@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "@solady/src/auth/Ownable.sol";
 import "@solady/src/utils/LibClone.sol";
 
-struct StableSettings {
+struct FixedSettings {
     address asset;
     address share;
     address creator;
@@ -17,14 +17,14 @@ struct StableSettings {
     bytes32 whitelistMerkleRoot;
 }
 
-struct StableFactorySettings {
+struct FixedFactorySettings {
     address feeRecipient;
     uint48 platformFee;
 }
 
 uint256 constant MAX_FEE_BIPS = 0.1e4;
 
-contract StableSaleFactory is Ownable {
+contract FixedPriceFactory is Ownable {
     using LibClone for address;
 
     /// -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ contract StableSaleFactory is Ownable {
     /// -----------------------------------------------------------------------
 
     /// @notice Storage for factory-specific settings.
-    StableFactorySettings public factorySettings;
+    FixedFactorySettings public factorySettings;
 
     /// -----------------------------------------------------------------------
     /// Immutable Storage
@@ -90,7 +90,7 @@ contract StableSaleFactory is Ownable {
         implementation = _implementation;
 
         // Set the initial factory settings including fee recipient and fees.
-        factorySettings = StableFactorySettings(_feeRecipient, _platformFee);
+        factorySettings = FixedFactorySettings(_feeRecipient, _platformFee);
 
         // Emit events for the initial fee settings.
         emit FeeRecipientSet(_feeRecipient);
@@ -104,7 +104,7 @@ contract StableSaleFactory is Ownable {
     /// @notice Creates a new Liquidity Pool with the provided settings and parameters.
     /// @param salt The salt value for deterministic pool creation.
     /// @return pool The address of the newly created Liquidity Bootstrap Pool.
-    function createIDOPool(StableSettings memory args, bytes32 salt) external virtual returns (address pool) {
+    function createFixedPool(FixedSettings memory args, bytes32 salt) external virtual returns (address pool) {
         if (args.share == args.asset || args.share == address(0) || args.asset == address(0)) {
             revert InvalidAssetOrShare();
         }
@@ -151,7 +151,7 @@ contract StableSaleFactory is Ownable {
     function modifySettings(address feeRecipient, uint48 platformFee) external virtual onlyOwner {
         if (platformFee > MAX_FEE_BIPS) revert MaxFeeExceeded();
 
-        factorySettings = StableFactorySettings(feeRecipient, platformFee);
+        factorySettings = FixedFactorySettings(feeRecipient, platformFee);
 
         emit FeeRecipientSet(feeRecipient);
         emit PlatformFeeSet(platformFee);
@@ -162,11 +162,11 @@ contract StableSaleFactory is Ownable {
     /// -----------------------------------------------------------------------
 
     /// @notice Predicts the deterministic address of a Liquidity Bootstrap Pool.
-    /// @param args The StableSettings struct containing pool-specific parameters.
+    /// @param args The FixedSettings struct containing pool-specific parameters.
     /// @param salt The salt value for deterministic pool creation.
     /// @return The deterministic address of the pool.
     function predictDeterministicAddress(
-        StableSettings memory args,
+        FixedSettings memory args,
         bytes32 salt
     )
         external
@@ -178,14 +178,14 @@ contract StableSaleFactory is Ownable {
     }
 
     /// @notice Predicts the init code hash for a Liquidity Bootstrap Pool.
-    /// @param args The StableSettings struct containing pool-specific parameters.
+    /// @param args The FixedSettings struct containing pool-specific parameters.
     /// @return The init code hash of the pool.
-    function predictInitCodeHash(StableSettings memory args) external view virtual returns (bytes32) {
+    function predictInitCodeHash(FixedSettings memory args) external view virtual returns (bytes32) {
         return implementation.initCodeHash(_encodeImmutableArgs(args));
     }
 
-    function _encodeImmutableArgs(StableSettings memory args) internal view virtual returns (bytes memory) {
-        StableFactorySettings memory settings = factorySettings;
+    function _encodeImmutableArgs(FixedSettings memory args) internal view virtual returns (bytes memory) {
+        FixedFactorySettings memory settings = factorySettings;
         unchecked {
             return abi.encodePacked(
                 // forgefmt: disable-start

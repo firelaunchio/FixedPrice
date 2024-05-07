@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./utils/Pausable.sol";
 
-contract StableSale is Pausable, Clone, ReentrancyGuard {
+contract FixedPrice is Pausable, Clone, ReentrancyGuard {
     using SafeTransferLib for address;
     using FixedPointMathLib for uint256;
     using MerkleProofLib for bytes32[];

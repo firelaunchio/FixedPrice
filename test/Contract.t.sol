@@ -2,13 +2,13 @@
 pragma solidity ^0.8.7;
 
 import { Test } from "forge-std/Test.sol";
-import { StableSale } from "../src/StableSale.sol";
-import { StableSaleFactory, StableSettings } from "../src/StableSaleFactory.sol";
+import { FixedPrice } from "../src/FixedPrice.sol";
+import { FixedPriceFactory, FixedSettings } from "../src/FixedPriceFactory.sol";
 import { Moon } from "./utils/Moon.sol";
 
 contract ContractTest is Test {
-    StableSale public pool;
-    StableSaleFactory public factory;
+    FixedPrice public pool;
+    FixedPriceFactory public factory;
 
     Moon public usdt;
     Moon public pepe;
@@ -25,8 +25,8 @@ contract ContractTest is Test {
         usdt = new Moon("usdt coin", "USDT");
         pepe = new Moon("pepe coin", "PEPE");
 
-        StableSale implementation = new StableSale();
-        factory = new StableSaleFactory(address(implementation), owner, owner, 300);
+        FixedPrice implementation = new FixedPrice();
+        factory = new FixedPriceFactory(address(implementation), owner, owner, 300);
         vm.warp(blockTime);
     }
 
@@ -38,7 +38,7 @@ contract ContractTest is Test {
 
         uint40 saleStart = uint40(blockTime) + 86_400;
         uint40 saleEnd = saleStart + 86_400 * 3;
-        pool = StableSale(create_pool(price, buyLimit, softCap, hardCap, saleStart, saleEnd));
+        pool = FixedPrice(create_pool(price, buyLimit, softCap, hardCap, saleStart, saleEnd));
     }
 
     function pool_buy() internal {
@@ -111,7 +111,7 @@ contract ContractTest is Test {
     {
         vm.startPrank(create);
 
-        StableSettings memory args = StableSettings({
+        FixedSettings memory args = FixedSettings({
             asset: address(usdt),
             share: address(pepe),
             creator: create,
@@ -124,7 +124,7 @@ contract ContractTest is Test {
             whitelistMerkleRoot: 0
         });
 
-        iPool = factory.createIDOPool(args, 0);
+        iPool = factory.createFixedPool(args, 0);
         vm.stopPrank();
     }
 }
