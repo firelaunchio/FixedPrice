@@ -19,14 +19,14 @@ contract RedeemTest is ContractTest {
     function test_redeemUsdt() public {
         vm.startPrank(user);
         uint256 beforeBalanceOf = usdt.balanceOf(user);
-        uint256 shares = pool.redeem(user);
+        uint256 assets = pool.redeem(user);
         uint256 afterBalanceOf = usdt.balanceOf(user);
         vm.stopPrank();
 
         console.log("beforeBalanceOf:%d", beforeBalanceOf);
-        console.log("shares:%d", shares);
+        console.log("assets:%d", assets);
         console.log("afterBalanceOf:%d", afterBalanceOf);
-        assertEq(beforeBalanceOf + shares, afterBalanceOf);
+        assertEq(beforeBalanceOf + assets, afterBalanceOf);
     }
 
     function test_redeemZero() public {
